@@ -1,3 +1,10 @@
+render_url:  https://ai-content-generator-jd9b.onrender.com
+
+
+readme url: https://mohammad-724.github.io/ai-content-generator/
+
+
+
 # AI Content Generation & Publishing Platform
 
 A simple **Generative AI & AI Engineering** web application for creating, managing, scheduling, and publishing AI-generated content.
