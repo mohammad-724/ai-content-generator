@@ -1,0 +1,1155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="AI Content Generation and Publishing Platform">
+    <title>AI Content Studio</title>
+    <style>
+        :root {
+            --bg: #f4f7fb;
+            --surface: #ffffff;
+            --surface-2: #f8fafc;
+            --text: #172033;
+            --muted: #64748b;
+            --border: #e2e8f0;
+            --accent: #4f46e5;
+            --accent-dark: #3730a3;
+            --success: #15803d;
+            --danger: #dc2626;
+            --shadow: 0 12px 35px rgba(15, 23, 42, 0.08);
+            --radius: 18px;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        html { scroll-behavior: smooth; }
+
+        body {
+            font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+        }
+
+        button, input, select, textarea { font: inherit; }
+
+        button { border: 0; }
+
+        .app-shell { min-height: 100vh; }
+
+        .topbar {
+            position: sticky;
+            top: 0;
+            z-index: 30;
+            background: rgba(255, 255, 255, 0.92);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .topbar-inner {
+            max-width: 1240px;
+            margin: auto;
+            padding: 16px 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 20px;
+        }
+
+        .brand { display: flex; align-items: center; gap: 12px; }
+
+        .brand-mark {
+            width: 42px;
+            height: 42px;
+            border-radius: 12px;
+            display: grid;
+            place-items: center;
+            color: white;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--accent), #7c3aed);
+            box-shadow: 0 8px 20px rgba(79, 70, 229, 0.28);
+        }
+
+        .brand h1 { font-size: 18px; line-height: 1.1; }
+        .brand p { font-size: 12px; color: var(--muted); margin-top: 3px; }
+
+        .top-actions { display: flex; align-items: center; gap: 10px; }
+
+        .server-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            border: 1px solid var(--border);
+            padding: 8px 11px;
+            border-radius: 999px;
+            background: var(--surface);
+            color: var(--muted);
+            font-size: 13px;
+        }
+
+        .dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #94a3b8;
+        }
+
+        .dot.online { background: #16a34a; }
+        .dot.error { background: #dc2626; }
+
+        .hero {
+            max-width: 1240px;
+            margin: 0 auto;
+            padding: 38px 24px 20px;
+        }
+
+        .hero-grid {
+            display: grid;
+            grid-template-columns: 1.45fr 0.75fr;
+            gap: 22px;
+        }
+
+        .hero-card {
+            position: relative;
+            overflow: hidden;
+            background: linear-gradient(135deg, #111827, #312e81);
+            color: white;
+            border-radius: 24px;
+            padding: 34px;
+            box-shadow: var(--shadow);
+        }
+
+        .hero-card::after {
+            content: "";
+            position: absolute;
+            width: 250px;
+            height: 250px;
+            right: -100px;
+            top: -120px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.08);
+        }
+
+        .hero-card h2 { font-size: clamp(28px, 4vw, 44px); line-height: 1.05; max-width: 720px; }
+        .hero-card p { margin-top: 14px; color: #dbeafe; max-width: 680px; line-height: 1.7; }
+
+        .hero-actions { margin-top: 24px; display: flex; flex-wrap: wrap; gap: 10px; }
+
+        .hero-button {
+            background: white;
+            color: #111827;
+            padding: 12px 16px;
+            border-radius: 12px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: transform .2s ease, opacity .2s ease;
+        }
+
+        .hero-button:hover { transform: translateY(-2px); opacity: .92; }
+        .hero-button.ghost { background: rgba(255,255,255,.12); color: white; border: 1px solid rgba(255,255,255,.18); }
+
+        .clock-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            padding: 28px;
+            box-shadow: var(--shadow);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .clock-label { color: var(--muted); font-size: 13px; }
+        .clock { font-size: 36px; font-weight: 800; margin-top: 6px; letter-spacing: -1px; }
+        .date { margin-top: 8px; color: var(--muted); line-height: 1.5; }
+
+        .dashboard {
+            max-width: 1240px;
+            margin: 0 auto;
+            padding: 10px 24px 48px;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 14px;
+            margin-bottom: 20px;
+        }
+
+        .stat-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 18px;
+            box-shadow: 0 8px 20px rgba(15,23,42,.04);
+            transition: transform .2s ease, box-shadow .2s ease;
+        }
+
+        .stat-card:hover { transform: translateY(-3px); box-shadow: var(--shadow); }
+        .stat-label { color: var(--muted); font-size: 12px; }
+        .stat-value { font-size: 27px; font-weight: 800; margin-top: 6px; }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 20px;
+        }
+
+        .card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 24px;
+            box-shadow: 0 8px 24px rgba(15,23,42,.05);
+        }
+
+        .card.full { grid-column: 1 / -1; }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 16px;
+            margin-bottom: 18px;
+        }
+
+        .card-header h3 { font-size: 20px; }
+        .card-header p { font-size: 13px; color: var(--muted); margin-top: 4px; }
+
+        .form-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; }
+        .field.full { grid-column: 1 / -1; }
+
+        label { display: block; color: #334155; font-size: 13px; font-weight: 700; margin-bottom: 7px; }
+
+        input, select, textarea {
+            width: 100%;
+            border: 1px solid var(--border);
+            background: #fff;
+            color: var(--text);
+            border-radius: 12px;
+            padding: 12px 13px;
+            outline: none;
+            transition: border-color .2s ease, box-shadow .2s ease, transform .2s ease;
+        }
+
+        textarea { min-height: 160px; resize: vertical; line-height: 1.55; }
+
+        input:focus, select:focus, textarea:focus {
+            border-color: #818cf8;
+            box-shadow: 0 0 0 4px rgba(99,102,241,.1);
+        }
+
+        .btn-row { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 16px; }
+
+        .btn {
+            padding: 11px 15px;
+            border-radius: 11px;
+            cursor: pointer;
+            font-weight: 700;
+            transition: transform .2s ease, box-shadow .2s ease, opacity .2s ease;
+        }
+
+        .btn:hover { transform: translateY(-2px); box-shadow: 0 8px 18px rgba(15,23,42,.08); }
+        .btn:disabled { opacity: .55; cursor: not-allowed; transform: none; box-shadow: none; }
+        .btn-primary { background: var(--accent); color: white; }
+        .btn-secondary { background: #eef2ff; color: #3730a3; }
+        .btn-dark { background: #111827; color: white; }
+        .btn-danger { background: #fee2e2; color: #991b1b; }
+        .btn-light { background: #f1f5f9; color: #334155; }
+
+        .result {
+            min-height: 170px;
+            background: var(--surface-2);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 18px;
+            white-space: pre-wrap;
+            line-height: 1.65;
+        }
+
+        .muted { color: var(--muted); }
+        .loading { margin-top: 10px; font-size: 13px; color: var(--muted); }
+
+        .success-box {
+            display: none;
+            margin-top: 14px;
+            background: #ecfdf5;
+            color: #166534;
+            border: 1px solid #bbf7d0;
+            border-radius: 12px;
+            padding: 11px 13px;
+            font-size: 13px;
+        }
+
+        .image-result { margin-top: 16px; text-align: center; }
+        .image-result img { width: 100%; max-width: 620px; border-radius: 16px; box-shadow: var(--shadow); }
+
+        .items { display: grid; gap: 12px; }
+
+        .item {
+            border: 1px solid var(--border);
+            background: var(--surface-2);
+            border-radius: 14px;
+            padding: 16px;
+        }
+
+        .item-head { display: flex; justify-content: space-between; gap: 12px; align-items: flex-start; }
+        .item-title { font-weight: 800; font-size: 15px; }
+        .item-text { white-space: pre-wrap; line-height: 1.55; margin-top: 9px; color: #334155; }
+        .meta { margin-top: 10px; color: var(--muted); font-size: 12px; line-height: 1.5; }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 9px;
+            border-radius: 999px;
+            font-size: 11px;
+            font-weight: 800;
+            background: #e2e8f0;
+            color: #334155;
+            white-space: nowrap;
+        }
+
+        .badge.green { background: #dcfce7; color: #166534; }
+        .badge.purple { background: #ede9fe; color: #5b21b6; }
+        .badge.red { background: #fee2e2; color: #991b1b; }
+
+        .image-history { display: none; }
+
+        .empty {
+            border: 1px dashed #cbd5e1;
+            border-radius: 14px;
+            padding: 20px;
+            text-align: center;
+            color: var(--muted);
+            background: #f8fafc;
+        }
+
+        .footer {
+            max-width: 1240px;
+            margin: 0 auto;
+            padding: 10px 24px 36px;
+            color: var(--muted);
+            font-size: 12px;
+            text-align: center;
+        }
+
+        .modal-backdrop {
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, .55);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            z-index: 50;
+        }
+
+        .modal {
+            width: min(520px, 100%);
+            background: white;
+            border-radius: 20px;
+            padding: 24px;
+            box-shadow: 0 30px 80px rgba(15,23,42,.28);
+        }
+
+        .modal h3 { font-size: 21px; }
+        .modal p { margin-top: 8px; color: var(--muted); line-height: 1.6; }
+        .modal .btn-row { justify-content: flex-end; }
+
+        @media (max-width: 1050px) {
+            .stats { grid-template-columns: repeat(3, 1fr); }
+            .hero-grid { grid-template-columns: 1fr; }
+        }
+
+        @media (max-width: 760px) {
+            .topbar-inner { padding: 12px 16px; }
+            .brand p { display: none; }
+            .server-pill { display: none; }
+            .hero, .dashboard, .footer { padding-left: 16px; padding-right: 16px; }
+            .hero-card, .clock-card, .card { border-radius: 16px; padding: 20px; }
+            .stats { grid-template-columns: repeat(2, 1fr); }
+            .grid { grid-template-columns: 1fr; }
+            .card.full { grid-column: auto; }
+            .form-grid { grid-template-columns: 1fr; }
+            .field.full { grid-column: auto; }
+        }
+
+        @media (max-width: 430px) {
+            .stats { grid-template-columns: 1fr 1fr; gap: 9px; }
+            .stat-card { padding: 13px; }
+            .stat-value { font-size: 22px; }
+            .clock { font-size: 29px; }
+        }
+    </style>
+</head>
+<body>
+<div class="app-shell">
+
+    <header class="topbar">
+        <div class="topbar-inner">
+            <div class="brand">
+                <div class="brand-mark">AI</div>
+                <div>
+                    <h1>AI Content Studio</h1>
+                    <p>Generate · Save · Schedule · Publish</p>
+                </div>
+            </div>
+            <div class="top-actions">
+                <div class="server-pill">
+                    <span id="serverDot" class="dot"></span>
+                    <span id="serverText">Checking server...</span>
+                </div>
+                <button class="btn btn-light" onclick="resetDemoData()">Reset Demo</button>
+            </div>
+        </div>
+    </header>
+
+    <section class="hero">
+        <div class="hero-grid">
+            <div class="hero-card">
+                <h2>Build, manage and schedule AI-powered content.</h2>
+                <p>
+                    Generate text with the connected AI backend, create an image prompt, save your best ideas,
+                    simulate publishing and automatically move due scheduled posts into your Published Content.
+                </p>
+                <div class="hero-actions">
+                    <button class="hero-button" onclick="scrollToId('generateCard')">Create Content</button>
+                    <button class="hero-button ghost" onclick="scrollToId('scheduleCard')">Schedule Post</button>
+                </div>
+            </div>
+
+            <div class="clock-card">
+                <div class="clock-label">Local dashboard time</div>
+                <div id="clock" class="clock">--:--:--</div>
+                <div id="date" class="date">Loading date...</div>
+                <div class="meta" style="margin-top:18px;">Automatic schedule checks run while this dashboard is open.</div>
+            </div>
+        </div>
+    </section>
+
+    <main class="dashboard">
+        <section class="stats">
+            <div class="stat-card"><div class="stat-label">Generated</div><div id="statGenerated" class="stat-value">0</div></div>
+            <div class="stat-card"><div class="stat-label">Saved</div><div id="statSaved" class="stat-value">0</div></div>
+            <div class="stat-card"><div class="stat-label">Scheduled</div><div id="statScheduled" class="stat-value">0</div></div>
+            <div class="stat-card"><div class="stat-label">Published</div><div id="statPublished" class="stat-value">0</div></div>
+            <div class="stat-card"><div class="stat-label">Images</div><div id="statImages" class="stat-value">0</div></div>
+        </section>
+
+        <section class="grid">
+
+            <div class="card" id="generateCard">
+                <div class="card-header">
+                    <div>
+                        <h3>Generate Content</h3>
+                        <p>Create platform-ready content from one topic.</p>
+                    </div>
+                    <span class="badge purple">AI</span>
+                </div>
+
+                <div class="form-grid">
+                    <div class="field full">
+                        <label for="topic">Topic</label>
+                        <input id="topic" type="text" maxlength="1000" placeholder="e.g. Generative AI for students">
+                    </div>
+
+                    <div class="field">
+                        <label for="contentType">Content Type</label>
+                        <select id="contentType">
+                            <option value="Blog post">Blog Post</option>
+                            <option value="LinkedIn post">LinkedIn Post</option>
+                            <option value="Instagram post">Instagram Post</option>
+                            <option value="Article">Article</option>
+                        </select>
+                    </div>
+
+                    <div class="field">
+                        <label for="tone">Tone</label>
+                        <select id="tone">
+                            <option value="Professional">Professional</option>
+                            <option value="Friendly">Friendly</option>
+                            <option value="Creative">Creative</option>
+                            <option value="Educational">Educational</option>
+                        </select>
+                    </div>
+
+                    <div class="field">
+                        <label for="length">Length</label>
+                        <select id="length">
+                            <option value="Short">Short</option>
+                            <option value="Medium">Medium</option>
+                            <option value="Long">Long</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="btn-row">
+                    <button id="generateButton" class="btn btn-primary" onclick="generateContent()">Generate Content</button>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <div>
+                        <h3>Generated Result</h3>
+                        <p>Your latest AI response appears here.</p>
+                    </div>
+                    <span id="generationBadge" class="badge">Ready</span>
+                </div>
+
+                <div id="generatedContent" class="result">Your generated content will appear here.</div>
+                <div class="btn-row">
+                    <button class="btn btn-secondary" onclick="saveContent()">Save Content</button>
+                    <button class="btn btn-dark" onclick="copyGeneratedContent()">Copy</button>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <div>
+                        <h3>Generate AI Image</h3>
+                        <p>Send a visual prompt to the configured image endpoint.</p>
+                    </div>
+                    <span class="badge purple">Image</span>
+                </div>
+
+                <label for="imagePrompt">Image Prompt</label>
+                <textarea id="imagePrompt" maxlength="1500" placeholder="e.g. Modern AI lab, realistic photography, natural lighting..."></textarea>
+
+                <div class="btn-row">
+                    <button id="imageButton" class="btn btn-primary" onclick="generateImage()">Generate Image</button>
+                </div>
+
+                <div id="imageLoading" class="loading"></div>
+                <div id="imageResult" class="image-result"></div>
+            </div>
+
+            <div class="card" id="scheduleCard">
+                <div class="card-header">
+                    <div>
+                        <h3>Schedule Content</h3>
+                        <p>Use a future local date/time for a scheduled post.</p>
+                    </div>
+                    <span class="badge">Scheduler</span>
+                </div>
+
+                <label for="schedulePlatform">Platform</label>
+                <select id="schedulePlatform">
+                    <option value="LinkedIn">LinkedIn</option>
+                    <option value="Instagram">Instagram</option>
+                    <option value="X / Twitter">X / Twitter</option>
+                    <option value="Facebook">Facebook</option>
+                </select>
+
+                <label for="scheduleDate" style="margin-top:14px;">Date & Time</label>
+                <input id="scheduleDate" type="datetime-local">
+
+                <div class="btn-row">
+                    <button class="btn btn-primary" onclick="scheduleContent()">Schedule Post</button>
+                </div>
+
+                <div id="scheduleMessage" class="success-box"></div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <div>
+                        <h3>Publish Content</h3>
+                        <p>Demo publishing only; no real social-media API is connected.</p>
+                    </div>
+                    <span class="badge green">Simulation</span>
+                </div>
+
+                <label for="platform">Platform</label>
+                <select id="platform">
+                    <option value="LinkedIn">LinkedIn</option>
+                    <option value="Instagram">Instagram</option>
+                    <option value="X / Twitter">X / Twitter</option>
+                    <option value="Facebook">Facebook</option>
+                </select>
+
+                <div class="btn-row">
+                    <button class="btn btn-dark" onclick="publishContent()">Publish Now</button>
+                </div>
+
+                <div id="publishMessage" class="success-box"></div>
+            </div>
+
+            <div class="card full">
+                <div class="card-header">
+                    <div>
+                        <h3>Scheduled Posts</h3>
+                        <p>Due posts are automatically moved to Published Content while this dashboard is open.</p>
+                    </div>
+                    <button class="btn btn-danger" onclick="clearScheduledContent()">Clear All</button>
+                </div>
+                <div id="scheduledContent" class="items"></div>
+            </div>
+
+            <div class="card full">
+                <div class="card-header">
+                    <div>
+                        <h3>Published Content</h3>
+                        <p>Includes manual publish simulations and completed scheduled posts.</p>
+                    </div>
+                    <button class="btn btn-danger" onclick="clearPublishedContent()">Clear All</button>
+                </div>
+                <div id="publishedContent" class="items"></div>
+            </div>
+
+            <div class="card full">
+                <div class="card-header">
+                    <div>
+                        <h3>Saved Content History</h3>
+                        <p>Saved locally in your browser for this project demo.</p>
+                    </div>
+                    <button class="btn btn-danger" onclick="clearHistory()">Clear All</button>
+                </div>
+                <div id="history" class="items"></div>
+            </div>
+
+        </section>
+    </main>
+
+    <footer class="footer">
+        AI Content Studio · Learning-focused Generative AI project · Scheduled publishing is a browser-side simulation.
+    </footer>
+</div>
+
+<div id="modalBackdrop" class="modal-backdrop">
+    <div class="modal">
+        <h3 id="modalTitle">Notice</h3>
+        <p id="modalText"></p>
+        <div class="btn-row">
+            <button class="btn btn-dark" onclick="closeModal()">Close</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    const API_BASE_URL = "";
+
+    let generatedContent = "";
+    let generatedCount = Number(localStorage.getItem("generatedCount") || 0);
+
+    function getStorage(key) {
+        try {
+            return JSON.parse(localStorage.getItem(key) || "[]");
+        } catch (error) {
+            console.error("Storage read error:", error);
+            return [];
+        }
+    }
+
+    function setStorage(key, value) {
+        localStorage.setItem(key, JSON.stringify(value));
+    }
+
+    function escapeHtml(text) {
+        const div = document.createElement("div");
+        div.textContent = String(text ?? "");
+        return div.innerHTML;
+    }
+
+    function showModal(title, text) {
+        document.getElementById("modalTitle").textContent = title;
+        document.getElementById("modalText").textContent = text;
+        document.getElementById("modalBackdrop").style.display = "flex";
+    }
+
+    function closeModal() {
+        document.getElementById("modalBackdrop").style.display = "none";
+    }
+
+    function scrollToId(id) {
+        document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+
+    async function checkServer() {
+        const dot = document.getElementById("serverDot");
+        const text = document.getElementById("serverText");
+
+        try {
+            const response = await fetch(`${API_BASE_URL}/health`, { cache: "no-store" });
+            if (!response.ok) throw new Error("Server unavailable");
+            dot.className = "dot online";
+            text.textContent = "Backend online";
+        } catch (error) {
+            dot.className = "dot error";
+            text.textContent = "Backend offline";
+        }
+    }
+
+    function updateClock() {
+        const now = new Date();
+        document.getElementById("clock").textContent = now.toLocaleTimeString();
+        document.getElementById("date").textContent = now.toLocaleDateString(undefined, {
+            weekday: "long",
+            year: "numeric",
+            month: "long",
+            day: "numeric"
+        });
+    }
+
+    function updateStats() {
+        const saved = getStorage("savedContent");
+        const scheduled = getStorage("scheduledContent");
+        const published = getStorage("publishedContent");
+        const images = getStorage("generatedImages");
+
+        document.getElementById("statGenerated").textContent = generatedCount;
+        document.getElementById("statSaved").textContent = saved.length;
+        document.getElementById("statScheduled").textContent = scheduled.length;
+        document.getElementById("statPublished").textContent = published.length;
+        document.getElementById("statImages").textContent = images.length;
+    }
+
+    async function generateContent() {
+        const topic = document.getElementById("topic").value.trim();
+        const contentType = document.getElementById("contentType").value;
+        const tone = document.getElementById("tone").value;
+        const length = document.getElementById("length").value;
+        const button = document.getElementById("generateButton");
+
+        if (!topic) {
+            showModal("Topic required", "Please enter a topic first.");
+            return;
+        }
+
+        button.disabled = true;
+        button.textContent = "Generating...";
+        document.getElementById("generationBadge").textContent = "Working";
+        document.getElementById("generatedContent").textContent = "Generating content...";
+
+        try {
+            const response = await fetch(`${API_BASE_URL}/generate-content`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ topic, content_type: contentType, tone, length })
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.detail || "Failed to generate content.");
+            }
+
+            generatedContent = data.generated_content || "";
+            document.getElementById("generatedContent").textContent = generatedContent;
+            document.getElementById("generationBadge").textContent = "Generated";
+
+            generatedCount += 1;
+            localStorage.setItem("generatedCount", String(generatedCount));
+            updateStats();
+        } catch (error) {
+            console.error(error);
+            document.getElementById("generationBadge").textContent = "Error";
+            document.getElementById("generatedContent").textContent = `Error generating content. ${error.message}`;
+        } finally {
+            button.disabled = false;
+            button.textContent = "Generate Content";
+        }
+    }
+
+    async function copyGeneratedContent() {
+        if (!generatedContent.trim()) {
+            showModal("Nothing to copy", "Generate content first.");
+            return;
+        }
+
+        try {
+            await navigator.clipboard.writeText(generatedContent);
+            showModal("Copied", "Generated content was copied to the clipboard.");
+        } catch (error) {
+            showModal("Copy failed", "Your browser did not allow clipboard access.");
+        }
+    }
+
+    function saveContent() {
+        if (!generatedContent.trim()) {
+            showModal("Nothing to save", "Generate content first.");
+            return;
+        }
+
+        const savedContent = getStorage("savedContent");
+        savedContent.push({
+            id: `${Date.now()}-${Math.random().toString(16).slice(2)}`,
+            content: generatedContent,
+            date: new Date().toLocaleString()
+        });
+
+        setStorage("savedContent", savedContent);
+        loadHistory();
+        updateStats();
+        showModal("Saved", "Content was added to Saved Content History.");
+    }
+
+    function loadHistory() {
+        const container = document.getElementById("history");
+        const savedContent = getStorage("savedContent");
+        container.innerHTML = "";
+
+        if (!savedContent.length) {
+            container.innerHTML = '<div class="empty">No saved content yet.</div>';
+            return;
+        }
+
+        savedContent.slice().reverse().forEach(item => {
+            const div = document.createElement("div");
+            div.className = "item";
+            div.innerHTML = `
+                <div class="item-head">
+                    <div class="item-title">Saved Content</div>
+                    <span class="badge">Saved</span>
+                </div>
+                <div class="item-text">${escapeHtml(item.content)}</div>
+                <div class="meta">Saved: ${escapeHtml(item.date)}</div>
+                <div class="btn-row">
+                    <button class="btn btn-danger" onclick="deleteContent(${JSON.stringify(item.id)})">Delete</button>
+                </div>
+            `;
+            container.appendChild(div);
+        });
+    }
+
+    function deleteContent(id) {
+        const updated = getStorage("savedContent").filter(item => item.id !== id);
+        setStorage("savedContent", updated);
+        loadHistory();
+        updateStats();
+    }
+
+    function clearHistory() {
+        if (!confirm("Delete all saved content?")) return;
+        localStorage.removeItem("savedContent");
+        loadHistory();
+        updateStats();
+    }
+
+    async function generateImage() {
+        const prompt = document.getElementById("imagePrompt").value.trim();
+        const button = document.getElementById("imageButton");
+        const loading = document.getElementById("imageLoading");
+        const result = document.getElementById("imageResult");
+
+        if (!prompt) {
+            showModal("Prompt required", "Enter an image prompt first.");
+            return;
+        }
+
+        button.disabled = true;
+        button.textContent = "Generating...";
+        loading.textContent = "Requesting image...";
+        result.innerHTML = "";
+
+        try {
+            const response = await fetch(`${API_BASE_URL}/generate-image`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ prompt })
+            });
+
+            const data = await response.json();
+            if (!response.ok) throw new Error(data.detail || "Failed to generate image.");
+
+            const image = document.createElement("img");
+            image.src = data.image;
+            image.alt = "AI generated image";
+
+            image.onload = () => {
+                loading.textContent = "";
+            };
+
+            image.onerror = () => {
+                loading.textContent = "";
+                result.innerHTML = '<div class="empty">The image service could not load this image.</div>';
+            };
+
+            result.appendChild(image);
+
+            const generatedImages = getStorage("generatedImages");
+            generatedImages.push({
+                id: `${Date.now()}-${Math.random().toString(16).slice(2)}`,
+                prompt,
+                image: data.image,
+                date: new Date().toLocaleString()
+            });
+            setStorage("generatedImages", generatedImages);
+            updateStats();
+        } catch (error) {
+            console.error(error);
+            loading.textContent = "";
+            result.innerHTML = `<div class="empty">Error generating image. ${escapeHtml(error.message)}</div>`;
+        } finally {
+            button.disabled = false;
+            button.textContent = "Generate Image";
+        }
+    }
+
+    function publishContent() {
+        if (!generatedContent.trim()) {
+            showModal("Nothing to publish", "Generate content before publishing.");
+            return;
+        }
+
+        const platform = document.getElementById("platform").value;
+        const publishedContent = getStorage("publishedContent");
+
+        publishedContent.push({
+            id: `${Date.now()}-${Math.random().toString(16).slice(2)}`,
+            content: generatedContent,
+            platform,
+            date: new Date().toLocaleString(),
+            status: "Published"
+        });
+
+        setStorage("publishedContent", publishedContent);
+        showSuccess("publishMessage", `Content published successfully to ${platform}!`);
+        loadPublishedContent();
+        updateStats();
+    }
+
+    function showSuccess(id, message) {
+        const box = document.getElementById(id);
+        box.textContent = message;
+        box.style.display = "block";
+        clearTimeout(box._timer);
+        box._timer = setTimeout(() => {
+            box.style.display = "none";
+        }, 4500);
+    }
+
+    function loadPublishedContent() {
+        const container = document.getElementById("publishedContent");
+        const publishedContent = getStorage("publishedContent");
+        container.innerHTML = "";
+
+        if (!publishedContent.length) {
+            container.innerHTML = '<div class="empty">No published content yet.</div>';
+            return;
+        }
+
+        publishedContent.slice().reverse().forEach(item => {
+            const div = document.createElement("div");
+            div.className = "item";
+            div.innerHTML = `
+                <div class="item-head">
+                    <div class="item-title">${escapeHtml(item.platform)}</div>
+                    <span class="badge green">${escapeHtml(item.status)}</span>
+                </div>
+                <div class="item-text">${escapeHtml(item.content)}</div>
+                <div class="meta">
+                    Published: ${escapeHtml(item.date)}
+                    ${item.scheduledTime ? `<br>Originally scheduled for: ${escapeHtml(item.scheduledTime)}` : ""}
+                </div>
+            `;
+            container.appendChild(div);
+        });
+    }
+
+    function clearPublishedContent() {
+        if (!confirm("Clear all published content?")) return;
+        localStorage.removeItem("publishedContent");
+        loadPublishedContent();
+        updateStats();
+    }
+
+    function scheduleContent() {
+        if (!generatedContent.trim()) {
+            showModal("Nothing to schedule", "Generate content before scheduling.");
+            return;
+        }
+
+        const platform = document.getElementById("schedulePlatform").value;
+        const scheduleDate = document.getElementById("scheduleDate").value;
+
+        if (!scheduleDate) {
+            showModal("Date required", "Select a future date and time.");
+            return;
+        }
+
+        const selectedDate = new Date(scheduleDate);
+        if (Number.isNaN(selectedDate.getTime())) {
+            showModal("Invalid date", "Select a valid date and time.");
+            return;
+        }
+
+        if (selectedDate.getTime() <= Date.now()) {
+            showModal("Future time required", "Choose a date and time in the future.");
+            return;
+        }
+
+        const scheduledContent = getStorage("scheduledContent");
+        scheduledContent.push({
+            id: `${Date.now()}-${Math.random().toString(16).slice(2)}`,
+            content: generatedContent,
+            platform,
+            scheduledTime: selectedDate.toLocaleString(),
+            timestamp: selectedDate.getTime(),
+            status: "Scheduled"
+        });
+
+        setStorage("scheduledContent", scheduledContent);
+        document.getElementById("scheduleDate").value = "";
+        showSuccess("scheduleMessage", `Post scheduled successfully for ${platform}.`);
+        loadScheduledContent();
+        updateStats();
+    }
+
+    function processScheduledPosts() {
+        const scheduledContent = getStorage("scheduledContent");
+        const due = scheduledContent.filter(item => item.status === "Scheduled" && item.timestamp <= Date.now());
+
+        if (!due.length) return;
+
+        let publishedContent = getStorage("publishedContent");
+        const dueIds = new Set(due.map(item => item.id));
+
+        due.forEach(item => {
+            publishedContent.push({
+                id: `${Date.now()}-${Math.random().toString(16).slice(2)}`,
+                content: item.content,
+                platform: item.platform,
+                date: new Date().toLocaleString(),
+                scheduledTime: item.scheduledTime,
+                status: "Published"
+            });
+        });
+
+        const remaining = scheduledContent.filter(item => !dueIds.has(item.id));
+
+        setStorage("scheduledContent", remaining);
+        setStorage("publishedContent", publishedContent);
+
+        showSuccess("scheduleMessage", `${due.length} scheduled post${due.length > 1 ? "s" : ""} moved to Published Content.`);
+        loadScheduledContent();
+        loadPublishedContent();
+        updateStats();
+    }
+
+    function loadScheduledContent() {
+        const container = document.getElementById("scheduledContent");
+        processScheduledPostsNoRender();
+        const scheduledContent = getStorage("scheduledContent");
+        container.innerHTML = "";
+
+        if (!scheduledContent.length) {
+            container.innerHTML = '<div class="empty">No scheduled posts yet.</div>';
+            return;
+        }
+
+        scheduledContent.slice().sort((a, b) => a.timestamp - b.timestamp).forEach(item => {
+            const div = document.createElement("div");
+            div.className = "item";
+            div.innerHTML = `
+                <div class="item-head">
+                    <div class="item-title">${escapeHtml(item.platform)}</div>
+                    <span class="badge">${escapeHtml(item.status)}</span>
+                </div>
+                <div class="item-text">${escapeHtml(item.content)}</div>
+                <div class="meta">Scheduled for: ${escapeHtml(item.scheduledTime)}</div>
+                <div class="btn-row">
+                    <button class="btn btn-danger" onclick="cancelScheduledPost(${JSON.stringify(item.id)})">Cancel</button>
+                </div>
+            `;
+            container.appendChild(div);
+        });
+    }
+
+    function processScheduledPostsNoRender() {
+        const scheduledContent = getStorage("scheduledContent");
+        if (!scheduledContent.length) return;
+
+        const due = scheduledContent.filter(item => item.status === "Scheduled" && item.timestamp <= Date.now());
+        if (!due.length) return;
+
+        let publishedContent = getStorage("publishedContent");
+        const dueIds = new Set(due.map(item => item.id));
+
+        due.forEach(item => {
+            publishedContent.push({
+                id: `${Date.now()}-${Math.random().toString(16).slice(2)}`,
+                content: item.content,
+                platform: item.platform,
+                date: new Date().toLocaleString(),
+                scheduledTime: item.scheduledTime,
+                status: "Published"
+            });
+        });
+
+        setStorage("scheduledContent", scheduledContent.filter(item => !dueIds.has(item.id)));
+        setStorage("publishedContent", publishedContent);
+    }
+
+    function cancelScheduledPost(id) {
+        if (!confirm("Cancel this scheduled post?")) return;
+        setStorage("scheduledContent", getStorage("scheduledContent").filter(item => item.id !== id));
+        loadScheduledContent();
+        updateStats();
+    }
+
+    function clearScheduledContent() {
+        if (!confirm("Clear all scheduled posts?")) return;
+        localStorage.removeItem("scheduledContent");
+        loadScheduledContent();
+        updateStats();
+    }
+
+    function automaticScheduleCheck() {
+        const before = getStorage("scheduledContent").length;
+        processScheduledPosts();
+        const after = getStorage("scheduledContent").length;
+
+        if (before !== after) {
+            loadScheduledContent();
+            loadPublishedContent();
+            updateStats();
+        }
+    }
+
+    function resetDemoData() {
+        if (!confirm("Reset all saved, scheduled, published and image demo data?")) return;
+
+        ["savedContent", "scheduledContent", "publishedContent", "generatedImages", "generatedCount"].forEach(key => {
+            localStorage.removeItem(key);
+        });
+
+        generatedContent = "";
+        document.getElementById("generatedContent").textContent = "Your generated content will appear here.";
+        document.getElementById("generationBadge").textContent = "Ready";
+        generatedCount = 0;
+
+        loadHistory();
+        loadScheduledContent();
+        loadPublishedContent();
+        updateStats();
+        showModal("Demo reset", "All browser-side demo data has been cleared.");
+    }
+
+    window.addEventListener("storage", () => {
+        loadHistory();
+        loadScheduledContent();
+        loadPublishedContent();
+        updateStats();
+    });
+
+    document.getElementById("modalBackdrop").addEventListener("click", event => {
+        if (event.target.id === "modalBackdrop") closeModal();
+    });
+
+    setInterval(updateClock, 1000);
+    setInterval(automaticScheduleCheck, 1000);
+    setInterval(checkServer, 15000);
+
+    updateClock();
+    loadHistory();
+    loadScheduledContent();
+    loadPublishedContent();
+    updateStats();
+    checkServer();
+</script>
+</body>
+</html>
