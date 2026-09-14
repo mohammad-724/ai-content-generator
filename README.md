@@ -1,20 +1,43 @@
 # AI Content Generation & Publishing Platform
 
-A beginner-friendly Generative AI web application that combines AI text generation, image prompting, local content history, simulated publishing, scheduled posts, and a dashboard UI.
+A simple **Generative AI & AI Engineering** web application for creating, managing, scheduling, and publishing AI-generated content.
+
+## Overview
+
+This project demonstrates how AI models can be integrated into a practical software application using a **FastAPI backend** and a lightweight **HTML, CSS, and JavaScript frontend**.
 
 ## Features
 
-- AI text generation with topic, content type, tone, and length controls
-- Save generated content in browser localStorage
-- Saved content history with individual delete and clear-all actions
-- AI image generation endpoint using the configured Pollinations image URL
-- Manual publishing simulation for LinkedIn, Instagram, X/Twitter, and Facebook
-- Scheduled post simulation
-- Automatic scheduled-post processing while the dashboard is open
-- Responsive dashboard with statistics and backend status indicator
-- FastAPI backend
-- Single-service deployment: FastAPI serves both API endpoints and the frontend
-- Render deployment configuration included
+- AI-powered text content generation
+- AI image generation
+- Save and manage generated content
+- Content history with delete options
+- Publishing simulation for social platforms
+- Schedule posts for a future date and time
+- Automatic scheduled-post processing while the application is open
+- Responsive dashboard-style interface
+
+## Tech Stack
+
+**Generative AI / AI Engineering**
+- OpenAI API
+- AI text generation
+- AI image generation integration
+
+**Backend**
+- Python
+- FastAPI
+- Uvicorn
+
+**Frontend**
+- HTML
+- CSS
+- JavaScript
+
+**Tools**
+- VS Code
+- Git & GitHub
+- Python Virtual Environment
 
 ## Project Structure
 
@@ -27,20 +50,23 @@ ai-content-generator/
 ├── .env.example
 ├── .gitignore
 ├── Procfile
-├── README.md
 ├── render.yaml
-└── requirements.txt
+├── requirements.txt
+└── README.md
 ```
 
-## Local Setup
+## Setup
 
-### 1. Open the project
+### 1. Clone the repository
 
-```powershell
-cd C:\Users\reeha\Desktop\ai-content-generator
+```bash
+git clone https://github.com/YOUR-USERNAME/YOUR-REPOSITORY.git
+cd ai-content-generator
 ```
 
-### 2. Create/activate the virtual environment
+### 2. Create and activate virtual environment
+
+Windows PowerShell:
 
 ```powershell
 python -m venv venv
@@ -49,21 +75,21 @@ python -m venv venv
 
 ### 3. Install dependencies
 
-```powershell
-python -m pip install -r requirements.txt
+```bash
+pip install -r requirements.txt
 ```
 
-### 4. Create `.env`
+### 4. Configure API key
 
-Copy `.env.example` to `.env` and add your API key:
+Create a `.env` file in the project root:
 
 ```env
-OPENAI_API_KEY=your_openai_api_key_here
+OPENAI_API_KEY=your_openai_api_key
 ```
 
-### 5. Start the application
+### 5. Run the application
 
-```powershell
+```bash
 uvicorn backend.main:app --reload
 ```
 
@@ -73,74 +99,44 @@ Open:
 http://127.0.0.1:8000
 ```
 
-API documentation:
+## AI Engineering Workflow
 
 ```text
-http://127.0.0.1:8000/docs
+User Input
+   ↓
+Frontend
+   ↓
+FastAPI Backend
+   ↓
+Generative AI API
+   ↓
+Generated Content
+   ↓
+Dashboard / Storage / Scheduling
 ```
 
-## Important Scheduler Note
+## Deployment
 
-The automatic scheduler is intentionally implemented in the browser for this learning project. A scheduled post moves from `Scheduled` to `Published` when its time arrives **while the dashboard page is open**. This is a simulation and does not publish to real social-media accounts.
+The project includes configuration files for deployment on **Render**.
 
-For a production scheduler, move scheduling to the backend and store jobs in a database with a server-side worker/scheduler.
-
-## GitHub
-
-```powershell
-git init
-git add .
-git commit -m "Finalize AI content generation and publishing platform"
-git branch -M main
-git remote add origin https://github.com/YOUR-USERNAME/YOUR-REPOSITORY.git
-git push -u origin main
-```
-
-## Render Deployment
-
-This repository includes `render.yaml`, so the deployment can use the project configuration directly.
-
-### Environment variable
-
-Set this secret in Render:
+Required environment variable:
 
 ```text
-OPENAI_API_KEY=your_openai_api_key
+OPENAI_API_KEY
 ```
 
-### Manual settings, if needed
+## Note
 
-Build Command:
+Publishing and scheduling are currently implemented as **application simulations**. Real social-media publishing can be added later using platform APIs and a persistent backend scheduler/database.
 
-```text
-pip install -r requirements.txt
-```
-
-Start Command:
-
-```text
-uvicorn backend.main:app --host 0.0.0.0 --port $PORT
-```
-
-After deployment, open the assigned Render URL.
-
-## Project Limitations
-
-- Social-media publishing is simulated.
-- Browser localStorage is used for saved/scheduled/published data.
-- Scheduled processing requires the browser page to remain open.
-- Image generation depends on the configured image service endpoint.
-- The OpenAI API requires an available API account/usage allowance.
-
-## Future Production Upgrades
+## Future Enhancements
 
 - User authentication
-- MySQL/PostgreSQL persistence
-- Real social-media APIs and OAuth
-- Rich content editor
-- Server-side scheduling worker
-- Content templates and analytics
-- File/image storage
-- React frontend
-- RAG/vector database features
-- AI agents and workflow automation
+- MySQL database
+- Real social-media API integration
+- React-based frontend
+- Advanced AI workflows, RAG, and AI agents
+
+## Author
+
+**Mohammad Azmath Ali**
